@@ -1,6 +1,11 @@
+"""Text, semantic, and parent-child chunking utilities for RAG ingestion."""
+
+from dataclasses import replace
+from enum import Enum
 from typing import Any, Optional
 
-from schema import Chunk
+from schema import Block, Chunk
+from tables import table_chunks
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import numpy as np
@@ -26,6 +31,21 @@ def fixed_chunks(
     size: int = 800,
     overlap: int = 100
 ) -> list[str]:
+    """Split text into overlapping character windows.
+
+    Args:
+        text: Source text to split.
+        size: Maximum number of characters per window.
+        overlap: Characters repeated between adjacent full windows.
+
+    Returns:
+        Non-whitespace chunks in source order.
+
+    Raises:
+        ValueError: For a nonpositive size or an invalid overlap.
+
+    This method does not preserve words or sentence boundaries.
+    """
 
     if size <= 0:
         raise ValueError("Chunk size must be positive")
@@ -46,6 +66,11 @@ def fixed_chunks(
     return chunks
 
 def split_prose(text: str) -> list[str]:
+    """Recursively split prose by paragraphs, lines, sentences, then words.
+
+    Chunks target 700 characters with up to 100 characters of overlap;
+    lengths are based on characters, not model tokens.
+    """
 
     if not text or not text.strip():
         return []
@@ -63,6 +88,20 @@ def semantic_chunks(
     min_chars: int = 120,
     max_chars: int = 1200
 ) -> list[str]:
+    """Group adjacent sentences according to embedding cosine similarity.
+
+    Args:
+        sentences: Text already segmented into individual sentences.
+        model: Encoder offering ``encode(..., normalize_embeddings=True)``.
+        threshold: Start a new chunk when adjacent cosine similarity is lower.
+        min_chars: Suppress semantic boundaries before this size.
+        max_chars: Soft maximum; an individual sentence may exceed this.
+
+    Returns:
+        Consecutive, nonempty semantic text groups.
+
+    The similarity threshold must be calibrated for the chosen model and corpus.
+    """
 
     if not -1 <= threshold <= 1:
         raise ValueError("Cosine threshold must be between -1 and 1")
@@ -128,8 +167,15 @@ def make_parent_children(
     doc_id: str,
     section_id: str,
     section_text: str,
-    metadata: Optional[dict[str, Any]] = None
-):
+    metadata: Optional[dict[str, Any]] = None,
+) -> tuple[dict[str, str], list[Chunk]]:
+    """Create retrievable child chunks and an external parent-text record.
+
+    Returns:
+        A mapping from parent ID to full section text and the child chunks.
+        Store the mapping separately, then use ``parent_id`` in each child's
+        metadata to retrieve larger context following vector search.
+    """
 
     section_text = section_text.strip()
 
@@ -167,4 +213,79 @@ def make_parent_children(
     return parent_store, children
 
 
+def _kind_value(kind: Any) -> str:
+    """Return the serialized content kind for an enum or plain string."""
+    return str(kind.value if isinstance(kind, Enum) else kind).lower()
 
+
+def blocks_to_chunks(blocks: list[Block]) -> list[Chunk]:
+    """Convert parsed blocks into ordered, source-traceable retrieval chunks.
+
+    Tables use row-aware splitting. Headings update section context and are
+    included with subsequent prose rather than embedded in isolation. All
+    other nonempty text, including dataset summaries, uses recursive splitting.
+
+    Args:
+        blocks: Parsed blocks in the order they appear in a document.
+
+    Returns:
+        Child-ready chunks with document, block, and source metadata.
+    """
+    result = []
+    heading_stack = []
+
+    for block_no, block in enumerate(blocks):
+        kind = _kind_value(block.kind)
+        text = block.text.strip()
+
+        if kind == "heading":
+            if not text:
+                continue
+
+            try:
+                level = max(1, int(block.metadata.get("heading_level", 1)))
+            except (TypeError, ValueError):
+                level = 1
+
+            heading_stack = [
+                (previous_level, heading)
+                for previous_level, heading in heading_stack
+                if previous_level < level
+            ]
+            heading_stack.append((level, text))
+            continue
+
+        metadata = dict(block.metadata)
+        metadata["block_index"] = block_no
+        heading_path = [heading for _, heading in heading_stack]
+        if heading_path:
+            metadata["heading_path"] = heading_path
+
+        if kind == "table":
+            metadata.setdefault("table_no", block_no + 1)
+            table_block = replace(block, metadata=metadata)
+            result.extend(table_chunks(table_block, rows_per_chunk=8))
+            continue
+
+        if not text:
+            continue
+
+        prefix = (
+            f"Section: {' > '.join(heading_path)}\n" if heading_path else ""
+        )
+        for index, part in enumerate(split_prose(text)):
+            chunk_metadata = dict(metadata)
+            chunk_metadata.update({
+                "content_type": kind,
+                "chunk_index": index,
+            })
+            result.append(
+                Chunk(
+                    chunk_id=f"{block.document_id}|block_{block_no}|chunk_{index}",
+                    document_id=block.document_id,
+                    text=prefix + part,
+                    metadata=chunk_metadata,
+                )
+            )
+
+    return result
