@@ -1,0 +1,11 @@
+pdfplumber
+python-docx
+openpyxl
+pandas
+beautifulsoup4
+langchain
+langchain-text-splitters
+sentence-transformers
+rank-bm25
+pdf2image
+pytesseract
