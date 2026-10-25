@@ -8,3 +8,6 @@ __pycache__/
 .env.*
 !.env.example
 .DS_Store
+local_qdrant
+.pytest_cache
+.coverage
