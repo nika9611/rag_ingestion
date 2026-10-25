@@ -1,0 +1,11 @@
+,point_id,payload.content_type,payload.source,payload.document_id,payload.chunk_id,payload.text,payload.embedding_model,payload.sheet,payload.table_no,payload.table_title,payload.table_ref,payload.row_start,payload.row_end,payload.row_count
+0,4104e0a2-d20f-5c32-bd9c-4f4aad967361,paragraph,sample_policy.txt,sample_policy.txt,sample_policy.txt|returns,Customers can return unused products within 30 days of purchase. A receipt is required for a full refund.,sentence-transformers/all-MiniLM-L6-v2,,,,,,,
+1,75e8bdab-b1bd-559d-adf1-ecadca6f9034,table_rows,sample_revenue.xlsx,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_1,"Table: Regional quarterly revenue
+Columns: Region, Quarter, Revenue (USD million).
+Region: North America | Quarter: Q2 | Revenue (USD million): 13.4",sentence-transformers/all-MiniLM-L6-v2,Revenue,1.0,Regional quarterly revenue,sample_revenue.xlsx|Revenue|table_1,1.0,2.0,1.0
+2,915c1abb-9958-5a8c-888b-8d1b44dd3746,table_rows,sample_revenue.xlsx,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_0,"Table: Regional quarterly revenue
+Columns: Region, Quarter, Revenue (USD million).
+Region: Europe | Quarter: Q2 | Revenue (USD million): 7.8",sentence-transformers/all-MiniLM-L6-v2,Revenue,1.0,Regional quarterly revenue,sample_revenue.xlsx|Revenue|table_1,0.0,1.0,1.0
+3,eec77835-bd5a-5f1f-8661-1158013bd896,table_rows,sample_revenue.xlsx,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_2,"Table: Regional quarterly revenue
+Columns: Region, Quarter, Revenue (USD million).
+Region: Asia | Quarter: Q2 | Revenue (USD million): 9.2",sentence-transformers/all-MiniLM-L6-v2,Revenue,1.0,Regional quarterly revenue,sample_revenue.xlsx|Revenue|table_1,2.0,3.0,1.0

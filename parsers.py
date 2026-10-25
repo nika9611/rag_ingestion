@@ -1,7 +1,9 @@
 """Extract text and tables from PDF, Word, Excel, and HTML sources."""
 
 import hashlib
+import json
 import re
+from dataclasses import asdict
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -10,7 +12,7 @@ from docx.table import Table
 from docx.text.paragraph import Paragraph
 from openpyxl import load_workbook
 import pdfplumber
-from schema import Block, Kind
+from schema import Block, Chunk, Kind
 
 
 def sha256_file(path: Path) -> str:
@@ -20,6 +22,48 @@ def sha256_file(path: Path) -> str:
         for part in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(part)
     return digest.hexdigest()
+
+
+def _sha256_record(record: Block | Chunk) -> str:
+    """Hash a dataclass using a consistent UTF-8 JSON representation."""
+    # Sorting keys makes metadata insertion order irrelevant. Preserve list
+    # order because table rows and columns have positional meaning.
+    payload = json.dumps(
+        asdict(record),
+        sort_keys=True,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def sha256_block(block: Block) -> str:
+    """Return a 64-character SHA-256 hex digest of all block fields.
+
+    Includes document ID, kind, text, headers, rows, and metadata. Dictionary
+    key order is ignored; list order and exact text (including whitespace)
+    are preserved. ``Kind`` values serialize as their underlying strings.
+
+    Metadata must contain JSON-compatible values with string dictionary keys
+    and finite numbers. Unsupported values raise ``TypeError`` or
+    ``ValueError``. The block is not modified and the digest is not stored.
+    """
+    return _sha256_record(block)
+
+
+def sha256_chunk(chunk: Chunk) -> str:
+    """Return a 64-character SHA-256 hex digest of all chunk fields.
+
+    Includes chunk ID, document ID, text, and metadata. Uses the same JSON
+    rules as ``sha256_block``: dictionary key order is ignored, while list
+    order and exact text are preserved. Unsupported metadata raises
+    ``TypeError`` or ``ValueError``.
+
+    The digest is computed from current field values on every call. Save it
+    separately to compare an object's state before and after edits.
+    """
+    return _sha256_record(chunk)
 
 
 def document_id(path: Path, root: Path) -> str:
