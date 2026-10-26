@@ -1,0 +1,11 @@
+2026-10-25 — Summary of changes made in this session
+- Updated the sample export to data/sample_qdrant_db.csv, including all matching points and excluding the pandas index.
+- Removed the redundant Columns line from table chunk text while preserving labeled row values and the table title in both text and metadata.
+- Updated table formatting tests; the latest ingestion and digest test run passed all 28 tests.
+Note: Existing Qdrant records require re-indexing and CSV re-export to reflect the new table text format.
+
+- Added delete_data() in vectordb.py to clear stored points or delete by document ID/content type while preserving collection settings; combined filters must both match, and empty filter strings are rejected.
+- Added ingest_medicare_pdf() in sample_vectordb.py to parse data/MediCare_UseCase.pdf, preserve source/page metadata, chunk prose and tables, and index the results with stable IDs; reports missing files or empty extraction.
+- Improved PDF parsing: remove empty table rows/columns, recover nonempty headers, inherit headers for matching typed table continuations, preserve text/table reading order, and remove repeated margin text.
+- Grouped short adjacent PDF paragraphs and recognized numbered section headings; table chunks now inherit section titles when no explicit title exists.
+- Added PDF quality regression checks and data/medicare_chunks_preview.txt for reviewing the 10 regenerated chunks without indexing them. Existing Qdrant records and CSV exports were not modified.

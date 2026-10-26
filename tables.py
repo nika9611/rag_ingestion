@@ -28,7 +28,7 @@ def table_row_text(block: Block, row: list[str]) -> str:
 
 
 def table_chunks(block: Block, rows_per_chunk: int = 10) -> list[Chunk]:
-    """Split a table into chunks with repeated headers and row coordinates.
+    """Split a table into labeled row chunks with titles and row coordinates.
 
     Args:
         block: Table block with column headers, data rows, and source metadata.
@@ -61,13 +61,10 @@ def table_chunks(block: Block, rows_per_chunk: int = 10) -> list[Chunk]:
     )
     table_ref = f"{block.document_id}|{source_location}|table_{table_id}"
 
-    columns = [
-        str(name).strip() if name else f"Column_{index + 1}"
-        for index, name in enumerate(block.headers)
-    ]
     title = block.metadata.get("table_title")
+    # Include the title in embedded text for context. Each row already labels
+    # its values, so a separate Columns line would repeat the same information.
     title_line = f"Table: {title}\n" if title else ""
-    table_header = title_line + f"Columns: {', '.join(columns)}.\n"
 
     chunks = []
     for start in range(0, len(block.rows), rows_per_chunk):
@@ -87,7 +84,7 @@ def table_chunks(block: Block, rows_per_chunk: int = 10) -> list[Chunk]:
             Chunk(
                 chunk_id=f"{table_ref}|rows_{start}",
                 document_id=block.document_id,
-                text=table_header + body,
+                text=title_line + body,
                 metadata=metadata,
             )
         )

@@ -1,0 +1,71 @@
+point_id,payload.page,payload.table_no,payload.bbox,payload.source,payload.block_index,payload.content_type,payload.table_ref,payload.row_start,payload.row_end,payload.row_count,payload.document_id,payload.chunk_id,payload.text,payload.embedding_model,payload.chunk_index,payload.heading_path,payload.headers_inherited,payload.continued_from_page,payload.table_title,payload.sheet
+181b21c6-8cef-599a-929a-d35c27a5ae45,1.0,1.0,"[53.931428571428604, 151.08000000000004, 557.897142857143, 189.96000000000006]",/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,1.0,table_rows,data/MediCare_UseCase.pdf|page_1|table_1,0.0,1.0,1.0,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|page_1|table_1|rows_0,Domain: Healthcare | Role: Data Scientist | Format: Jupyter Notebook + CSV | Time Limit: 40 Minutes,sentence-transformers/all-MiniLM-L6-v2,,,,,,
+20803a08-afa6-5876-b02f-48a2cbd0da46,1.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,0.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_0|chunk_0,"DATA SCIENTIST INTERVIEW
+
+Use Case Assessment
+
+MediCare Patient Follow-Up Agent",sentence-transformers/all-MiniLM-L6-v2,0.0,,,,,
+21cb36dc-3e66-5056-a824-336cdedc9fd9,2.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,12.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_12|chunk_0,"Section: 5. Submission Requirements
+• A single Jupyter Notebook (.ipynb) with all cells run and outputs visible.
+
+• The patient_data.csv file placed in the same directory as the notebook.
+
+• The notebook must run end-to-end without errors when rerun from top.
+
+• Use the LLM API (You can mask the sAPI Key)
+
+• Total code (excluding markdown and comments) must not exceed 250 lines.
+
+• Submit via the link shared in your interview invitation email before the scheduled interview date.
+
+Good luck! We look forward to discussing your implementation.",sentence-transformers/all-MiniLM-L6-v2,0.0,['5. Submission Requirements'],,,,
+2dc0a58d-44db-549a-9684-9e64e2ccc740,1.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,4.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_4|chunk_0,"Section: 1. Scenario Background
+Your role:
+
+You are a Data Scientist hired to build a prototype of this agent using Agentic AI. You will be given a dataset of 100 patients and must build an AI agent that autonomously orchestrates tool calls to analyse patient data, flag clinical risks, and generate follow-up care actions.",sentence-transformers/all-MiniLM-L6-v2,0.0,['1. Scenario Background'],,,,
+306cf6c7-c531-56ab-8fe9-23e00c333d15,2.0,1.0,"[53.93142857142858, 54.120000000000005, 557.8971428571425, 210.84000000000006]",/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,8.0,table_rows,data/MediCare_UseCase.pdf|page_2|table_1,0.0,8.0,8.0,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|page_2|table_1|rows_0,"Table: 2. Dataset Description
+Column: next_scheduled_visit | Type: Date | Description: Date of next scheduled appointment
+Column: days_since_last_visit | Type: Integer | Description: Days elapsed since last visit
+Column: missed_last_appointment | Type: String | Description: Yes / No — did patient miss their last appointment
+Column: vitals_bp_systolic | Type: Integer | Description: Systolic blood pressure (mmHg)
+Column: vitals_bp_diastolic | Type: Integer | Description: Diastolic blood pressure (mmHg)
+Column: vitals_heart_rate | Type: Integer | Description: Heart rate (beats per minute)
+Column: vitals_spo2 | Type: Integer | Description: Blood oxygen saturation (%)
+Column: notes | Type: String | Description: Free-text clinical notes from last visit",sentence-transformers/all-MiniLM-L6-v2,,['2. Dataset Description'],True,1.0,2. Dataset Description,
+4104e0a2-d20f-5c32-bd9c-4f4aad967361,,,,sample_policy.txt,,paragraph,,,,,sample_policy.txt,sample_policy.txt|returns,Customers can return unused products within 30 days of purchase. A receipt is required for a full refund.,sentence-transformers/all-MiniLM-L6-v2,,,,,,
+4781dcfd-5b95-5f11-9730-3a5aecaa018b,1.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,3.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_3|chunk_0,"Section: 1. Scenario Background
+MediCare Clinic is a mid-sized outpatient healthcare facility managing over 1,000 chronic disease patients. The clinical team struggles to proactively manage follow-up care across patients with conditions such as Type 2 Diabetes, Hypertension, Heart Failure, COPD, and Anemia. Patients who miss appointments or show worsening lab values are often not identified until their next scheduled visit, leading to avoidable complications and hospital readmissions.
+
+The clinic's medical director wants to deploy an AI-powered agent that can autonomously review patient records, identify those at risk, and generate prioritised action plans for the care coordination team.",sentence-transformers/all-MiniLM-L6-v2,0.0,['1. Scenario Background'],,,,
+4dd77b5f-0b5b-53f3-a1a5-56cfcdcea16f,1.0,2.0,"[53.931428571428604, 512.3399999999998, 557.897142857143, 727.7999799999999]",/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,7.0,table_rows,data/MediCare_UseCase.pdf|page_1|table_2,0.0,8.0,8.0,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|page_1|table_2|rows_0,"Table: 2. Dataset Description
+Column: patient_id | Type: String | Description: Unique patient identifier (e.g., P0001)
+Column: patient_name | Type: String | Description: Patient full name
+Column: age | Type: Integer | Description: Patient age in years
+Column: gender | Type: String | Description: Male / Female
+Column: diagnosis | Type: String | Description: Primary diagnosis (may be compound)
+Column: current_medication | Type: String | Description: Current prescribed medication(s)
+Column: lab_test | Type: String | Description: Most recent lab test name
+Column: lab_value | Type: Float | Description: Numerical result of the lab test",sentence-transformers/all-MiniLM-L6-v2,,['2. Dataset Description'],,,2. Dataset Description,
+75e8bdab-b1bd-559d-adf1-ecadca6f9034,,1.0,,sample_revenue.xlsx,,table_rows,sample_revenue.xlsx|Revenue|table_1,1.0,2.0,1.0,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_1,"Table: Regional quarterly revenue
+Region: North America | Quarter: Q2 | Revenue (USD million): 13.4",sentence-transformers/all-MiniLM-L6-v2,,,,,Regional quarterly revenue,Revenue
+805745a5-44fe-57a5-8d1d-2d3041293b32,2.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,10.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_10|chunk_0,"Section: 3. Tasks
+Complete all tasks in a single Jupyter Notebook. Your notebook must be self-contained and runnable. The agent must use an LLM (e.g., Grok, OpenAI, Anthropic API etc) to make decisions — do not hardcode logic for actions that should be decided by the LLM.
+
+Task 1 — Data Loading & Exploratory Analysis
+
+Task 2 — Define Agent Tools
+
+Task 3 — Implement the Agentic Loop
+
+Task 4 — Single Patient Analysis
+
+Task 5 — Missed Appointment Follow-Up",sentence-transformers/all-MiniLM-L6-v2,0.0,['3. Tasks'],,,,
+915c1abb-9958-5a8c-888b-8d1b44dd3746,,1.0,,sample_revenue.xlsx,,table_rows,sample_revenue.xlsx|Revenue|table_1,0.0,1.0,1.0,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_0,"Table: Regional quarterly revenue
+Region: Europe | Quarter: Q2 | Revenue (USD million): 7.8",sentence-transformers/all-MiniLM-L6-v2,,,,,Regional quarterly revenue,Revenue
+af1a1b39-ed60-5194-b5d9-c16339c44c23,1.0,2.0,"[53.931428571428604, 512.3399999999998, 557.897142857143, 727.7999799999999]",/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,7.0,table_rows,data/MediCare_UseCase.pdf|page_1|table_2,8.0,10.0,2.0,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|page_1|table_2|rows_8,"Table: 2. Dataset Description
+Column: lab_unit | Type: String | Description: Unit of measurement (%, mmHg, g/dL, etc.)
+Column: last_visit_date | Type: Date | Description: Date of the patient's last clinic visit",sentence-transformers/all-MiniLM-L6-v2,,['2. Dataset Description'],,,2. Dataset Description,
+eec77835-bd5a-5f1f-8661-1158013bd896,,1.0,,sample_revenue.xlsx,,table_rows,sample_revenue.xlsx|Revenue|table_1,2.0,3.0,1.0,sample_revenue.xlsx,sample_revenue.xlsx|Revenue|table_1|rows_2,"Table: Regional quarterly revenue
+Region: Asia | Quarter: Q2 | Revenue (USD million): 9.2",sentence-transformers/all-MiniLM-L6-v2,,,,,Regional quarterly revenue,Revenue
+fd9f4c2b-56a2-547d-aaea-169128b45622,1.0,,,/Users/puneetjain/Documents/Project/RAG/data/MediCare_UseCase.pdf,6.0,paragraph,,,,,data/MediCare_UseCase.pdf,data/MediCare_UseCase.pdf|block_6|chunk_0,"Section: 2. Dataset Description
+The file patient_data.csv contains 100 anonymised patient records. Each row represents one patient's most recent clinical snapshot.",sentence-transformers/all-MiniLM-L6-v2,0.0,['2. Dataset Description'],,,,

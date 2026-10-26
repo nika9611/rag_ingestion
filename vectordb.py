@@ -147,6 +147,46 @@ def search(
                 limit=limit,
             ).points
 
+def delete_data(
+    *,
+    document_id: str | None = None,
+    content_type: str | None = None,
+) -> models.UpdateResult | None:
+    """Delete stored points while preserving the collection and its settings.
+
+    Args:
+        document_id: Optional exact document ID whose chunks should be deleted.
+        content_type: Optional exact content type, e.g. ``"table_rows"``.
+
+    With no filters, deletes ALL points in the configured collection. When
+    both filters are provided, only points matching BOTH are deleted. Empty
+    strings are rejected to prevent an accidental unfiltered deletion.
+
+    Returns:
+        Qdrant's update result after deletion completes, or None if the
+        collection does not exist. Source files and CSV exports are untouched.
+    """
+    conditions = []
+    for key, value in (("document_id", document_id), ("content_type", content_type)):
+        if value is not None:
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{key} must be a nonempty string or None")
+            conditions.append(models.FieldCondition(
+                key=key, match=models.MatchValue(value=value)
+            ))
+
+    if not client.collection_exists(COLLECTION):
+        return None
+
+    # An empty filter matches every point. Combining conditions with must
+    # limits deletion to their intersection when multiple filters are supplied.
+    return client.delete(
+        collection_name=COLLECTION,
+        points_selector=models.FilterSelector(filter=models.Filter(must=conditions)),
+        wait=True,
+    )
+
+
 def show_table(
     limit: int | None = 20,
     content_type: str | None = None,
@@ -207,20 +247,6 @@ def show_table(
             break
 
     dataframe = pd.DataFrame(rows) if rows else pd.DataFrame(columns=["point_id"])
-    if dataframe.empty:
-        print("No stored chunks match the requested filter.")
-    else:
-        # Local display options reveal every column and full cell values without
-        # changing pandas settings for the rest of the application.
-        with pd.option_context(
-            "display.max_columns", None,
-            "display.max_colwidth", None,
-            "display.max_seq_items", None,
-        ):
-            print(dataframe.to_string(index=False))
-        print(f"Displayed {len(dataframe)} stored chunks from '{COLLECTION}'.")
-        if offset is not None:
-            print("More matches are available; increase limit or use limit=None.")
     return dataframe
 
 

@@ -1,0 +1,82 @@
+CHUNK 0 | Page 1 | paragraph
+DATA SCIENTIST INTERVIEW
+
+Use Case Assessment
+
+MediCare Patient Follow-Up Agent
+
+CHUNK 1 | Page 1 | table_rows
+Domain: Healthcare | Role: Data Scientist | Format: Jupyter Notebook + CSV | Time Limit: 40 Minutes
+
+CHUNK 2 | Page 1 | paragraph
+Section: 1. Scenario Background
+MediCare Clinic is a mid-sized outpatient healthcare facility managing over 1,000 chronic disease patients. The clinical team struggles to proactively manage follow-up care across patients with conditions such as Type 2 Diabetes, Hypertension, Heart Failure, COPD, and Anemia. Patients who miss appointments or show worsening lab values are often not identified until their next scheduled visit, leading to avoidable complications and hospital readmissions.
+
+The clinic's medical director wants to deploy an AI-powered agent that can autonomously review patient records, identify those at risk, and generate prioritised action plans for the care coordination team.
+
+CHUNK 3 | Page 1 | paragraph
+Section: 1. Scenario Background
+Your role:
+
+You are a Data Scientist hired to build a prototype of this agent using Agentic AI. You will be given a dataset of 100 patients and must build an AI agent that autonomously orchestrates tool calls to analyse patient data, flag clinical risks, and generate follow-up care actions.
+
+CHUNK 4 | Page 1 | paragraph
+Section: 2. Dataset Description
+The file patient_data.csv contains 100 anonymised patient records. Each row represents one patient's most recent clinical snapshot.
+
+CHUNK 5 | Page 1 | table_rows
+Table: 2. Dataset Description
+Column: patient_id | Type: String | Description: Unique patient identifier (e.g., P0001)
+Column: patient_name | Type: String | Description: Patient full name
+Column: age | Type: Integer | Description: Patient age in years
+Column: gender | Type: String | Description: Male / Female
+Column: diagnosis | Type: String | Description: Primary diagnosis (may be compound)
+Column: current_medication | Type: String | Description: Current prescribed medication(s)
+Column: lab_test | Type: String | Description: Most recent lab test name
+Column: lab_value | Type: Float | Description: Numerical result of the lab test
+
+CHUNK 6 | Page 1 | table_rows
+Table: 2. Dataset Description
+Column: lab_unit | Type: String | Description: Unit of measurement (%, mmHg, g/dL, etc.)
+Column: last_visit_date | Type: Date | Description: Date of the patient's last clinic visit
+
+CHUNK 7 | Page 2 | table_rows
+Table: 2. Dataset Description
+Column: next_scheduled_visit | Type: Date | Description: Date of next scheduled appointment
+Column: days_since_last_visit | Type: Integer | Description: Days elapsed since last visit
+Column: missed_last_appointment | Type: String | Description: Yes / No — did patient miss their last appointment
+Column: vitals_bp_systolic | Type: Integer | Description: Systolic blood pressure (mmHg)
+Column: vitals_bp_diastolic | Type: Integer | Description: Diastolic blood pressure (mmHg)
+Column: vitals_heart_rate | Type: Integer | Description: Heart rate (beats per minute)
+Column: vitals_spo2 | Type: Integer | Description: Blood oxygen saturation (%)
+Column: notes | Type: String | Description: Free-text clinical notes from last visit
+
+CHUNK 8 | Page 2 | paragraph
+Section: 3. Tasks
+Complete all tasks in a single Jupyter Notebook. Your notebook must be self-contained and runnable. The agent must use an LLM (e.g., Grok, OpenAI, Anthropic API etc) to make decisions — do not hardcode logic for actions that should be decided by the LLM.
+
+Task 1 — Data Loading & Exploratory Analysis
+
+Task 2 — Define Agent Tools
+
+Task 3 — Implement the Agentic Loop
+
+Task 4 — Single Patient Analysis
+
+Task 5 — Missed Appointment Follow-Up
+
+CHUNK 9 | Page 2 | paragraph
+Section: 5. Submission Requirements
+• A single Jupyter Notebook (.ipynb) with all cells run and outputs visible.
+
+• The patient_data.csv file placed in the same directory as the notebook.
+
+• The notebook must run end-to-end without errors when rerun from top.
+
+• Use the LLM API (You can mask the sAPI Key)
+
+• Total code (excluding markdown and comments) must not exceed 250 lines.
+
+• Submit via the link shared in your interview invitation email before the scheduled interview date.
+
+Good luck! We look forward to discussing your implementation.

@@ -64,8 +64,10 @@ def test_table_chunks(sales_table, rows_per_chunk, expected_ranges):
     chunks = table_chunks(sales_table, rows_per_chunk=rows_per_chunk)
     assert [(c.metadata["row_start"], c.metadata["row_end"]) for c in chunks] == expected_ranges
     assert len({c.chunk_id for c in chunks}) == len(chunks)
-    assert all("Columns: SKU, Revenue" in c.text for c in chunks)
+    assert all("Columns:" not in c.text for c in chunks)
+    assert all("SKU:" in c.text and "Revenue:" in c.text for c in chunks)
     assert all("Table: October" in c.text for c in chunks)
+    assert all(c.metadata["table_title"] == "October" for c in chunks)
 
 
 @pytest.mark.parametrize("invalid_size", [0, -1])

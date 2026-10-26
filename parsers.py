@@ -75,74 +75,130 @@ def document_id(path: Path, root: Path) -> str:
     return str(path.resolve().relative_to(root.resolve()))
 
 
-def parse_pdf(path: Path, doc_id: str) -> list[Block]:
-    """Extract page prose and detected tables into separate PDF blocks.
+def _clean_pdf_table(rows: list[list[str | None]]) -> list[list[str]]:
+    """Remove wholly empty rows/columns while preserving meaningful cell positions."""
+    matrix = [[(cell or "").strip() for cell in row] for row in rows if row is not None]
+    matrix = [row for row in matrix if any(row)]
+    if not matrix:
+        return []
+    occupied = [
+        index for index in range(max(map(len, matrix)))
+        if any(index < len(row) and row[index] for row in matrix)
+    ]
+    return [[row[index] if index < len(row) else "" for index in occupied] for row in matrix]
 
-    Table characters are excluded from prose using detected bounding boxes.
-    Text extraction does not perform OCR on scanned pages, and the first row
-    of each detected table is assumed to contain headers.
+
+def parse_pdf(path: Path, doc_id: str) -> list[Block]:
+    """Extract prose, numbered headings, and cleaned tables in page reading order.
+
+    Removes repeated margin text and empty table rows/columns. The first
+    nonempty row supplies headers. A headerless data-dictionary continuation
+    can inherit the preceding page's headers when geometry and types agree.
+    Other headerless tables still require source-specific header handling.
+    Text extraction does not perform OCR on scanned pages.
     """
     output = []
     with pdfplumber.open(path) as pdf:
+        # Only repeated text at the page margins is considered boilerplate.
+        # Normalize page numbers so Page 1 and Page 2 match the same footer.
+        def margin_key(text):
+            return re.sub(r"\d+", "#", text.strip().lower())
+
+        margins = {}
+        for page_no, page in enumerate(pdf.pages, 1):
+            for line in page.extract_text_lines():
+                if line["top"] < page.height * 0.05 or line["top"] > page.height * 0.92:
+                    margins.setdefault(margin_key(line["text"]), set()).add(page_no)
+        repeated = {key for key, pages in margins.items() if len(pages) > 1}
+        previous_table = None
+
         for page_no, page in enumerate(pdf.pages, start=1):
-            found = page.find_tables()
-            boxes = [t.bbox for t in found]
+            found = sorted(page.find_tables(), key=lambda table: table.bbox[1])
+            boxes = [table.bbox for table in found]
 
             def inside_table(obj):
-                """Check whether a PDF character's center lies inside a table."""
                 if obj.get("object_type") != "char":
                     return False
-
                 x = (obj["x0"] + obj["x1"]) / 2
                 y = (obj["top"] + obj["bottom"]) / 2
+                return any(x0 <= x < x1 and y0 <= y <= y1 for x0, y0, x1, y1 in boxes)
 
-                return any(
-                    x0 <= x < x1 and y0 <= y <= y1
-                    for x0, y0, x1, y1 in boxes
-                )
+            # Interleave text lines and tables instead of appending all tables
+            # after the page's prose, which destroys their section context.
+            events = []
+            for line in page.filter(lambda obj: not inside_table(obj)).extract_text_lines():
+                at_margin = line["top"] < page.height * 0.05 or line["top"] > page.height * 0.92
+                if at_margin and margin_key(line["text"]) in repeated:
+                    continue
+                events.append((line["top"], "line", line))
+            events.extend((table.bbox[1], "table", (number, table)) for number, table in enumerate(found, 1))
+            events.sort(key=lambda event: event[0])
+            paragraph = []
+            last_bottom = None
 
-            outside = page.filter(lambda o: not inside_table(o))
-            prose = outside.extract_text() or ""
+            def flush_paragraph():
+                if paragraph:
+                    text = " ".join(paragraph)
+                    # Group short adjacent paragraphs/list items without crossing
+                    # a heading or table. Keep labels with what follows them.
+                    previous = output[-1] if output else None
+                    if (previous is not None and previous.kind == Kind.PARAGRAPH
+                            and previous.metadata["page"] == page_no
+                            and not text.endswith(":")
+                            and len(previous.text) + len(text) + 2 <= 700):
+                        previous.text += "\n\n" + text
+                    else:
+                        output.append(Block(
+                            document_id=doc_id, kind=Kind.PARAGRAPH, text=text,
+                            metadata={"page": page_no, "source": str(path)},
+                        ))
+                    paragraph.clear()
 
-            if prose.strip():
-                output.append(
-                    Block(
-                        document_id=doc_id,
-                        kind=Kind.PARAGRAPH,
-                        text=prose,
-                        metadata={
-                            "page": page_no,
-                            "source": str(path),
-                        },
-                    )
-                )
-
-            for number, table in enumerate(found, start=1):
-                rows = [
-                    [
-                        (c or "").strip() for c in row
-                    ]
-                    for row in (table.extract() or [])
-                    if row is not None
-                ]
-
-                if not rows:
+            for top, event_type, value in events:
+                if event_type == "line":
+                    text = value["text"].strip()
+                    is_heading = bool(re.match(r"^\d+\.\s+\S", text))
+                    if is_heading or (last_bottom is not None and top - last_bottom > 4):
+                        flush_paragraph()
+                    if is_heading:
+                        output.append(Block(
+                            document_id=doc_id, kind=Kind.HEADING, text=text,
+                            metadata={"page": page_no, "source": str(path), "heading_level": 1},
+                        ))
+                    else:
+                        paragraph.append(text)
+                    last_bottom = value["bottom"]
                     continue
 
-                output.append(
-                    Block(
-                        document_id=doc_id,
-                        kind=Kind.TABLE,
-                        headers=rows[0],
-                        rows=rows[1:],
-                        metadata={
-                            "page": page_no,
-                            "table_no": number,
-                            "bbox": list(table.bbox),
-                            "source": str(path),
-                        },
-                    )
-                )
+                flush_paragraph()
+                last_bottom = None
+                number, table = value
+                rows = _clean_pdf_table(table.extract() or [])
+                if not rows:
+                    continue
+                metadata = {"page": page_no, "table_no": number,
+                            "bbox": list(table.bbox), "source": str(path)}
+                headers, data = rows[0], rows[1:]
+                if previous_table is not None:
+                    previous, previous_height = previous_table
+                    # Be conservative: inherit only for adjacent-page tables
+                    # with aligned edges and a recognizable typed schema.
+                    types = {"string", "integer", "float", "date", "boolean", "number", "datetime"}
+                    inherited = previous.headers or []
+                    same_shape = len(rows[0]) == len(inherited)
+                    aligned = all(abs(table.bbox[i] - previous.metadata["bbox"][i]) < 3 for i in (0, 2))
+                    typed_rows = same_shape and len(inherited) >= 2 and inherited[1].lower() in {"type", "data type"} and all(row[1].lower() in types for row in rows)
+                    if (previous.metadata["page"] == page_no - 1
+                            and previous.metadata["bbox"][3] > previous_height * 0.65
+                            and table.bbox[1] < page.height * 0.15
+                            and same_shape and aligned and typed_rows):
+                        headers, data = inherited.copy(), rows
+                        metadata.update({"headers_inherited": True, "continued_from_page": page_no - 1})
+                block = Block(document_id=doc_id, kind=Kind.TABLE,
+                              headers=headers, rows=data, metadata=metadata)
+                output.append(block)
+                previous_table = (block, page.height)
+            flush_paragraph()
     return output
 
 

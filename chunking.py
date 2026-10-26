@@ -263,6 +263,9 @@ def blocks_to_chunks(blocks: list[Block]) -> list[Chunk]:
 
         if kind == "table":
             metadata.setdefault("table_no", block_no + 1)
+            # Keep the source section in embedded table text, not just metadata.
+            if heading_path:
+                metadata.setdefault("table_title", heading_path[-1])
             table_block = replace(block, metadata=metadata)
             result.extend(table_chunks(table_block, rows_per_chunk=8))
             continue
